@@ -2,8 +2,7 @@
 
 # static variables
 SIM_URL="https://github.com/MITRacecarNeo/RacecarNeo-Simulator.git"
-LIB_URL="https://github.com/MITRacecarNeo/racecar-neo-library.git"
-CURR_URL="https://github.com/MITRacecarNeo/racecar-neo-"
+CURR_URL="https://github.com/ArrowsInstitute/GLOBALTECH_LABS.git"
 
 # Get the full path of the current script
 SCRIPT_PATH=$(readlink -f "$0" 2>/dev/null || echo "$(cd "$(dirname "$0")"; pwd)/$(basename "$0")")
@@ -53,13 +52,10 @@ do
             # Go one folder back from scripts directory
             cd "$SCRIPT_DIR"/..
             # Set up library and labs folder w/ correct formatting
-            git clone "${LIB_URL}" 
-            mv racecar-neo-library/library library
-            rm -rf racecar-neo-library
-
-            git clone "${CURR_URL}${CURRICULUM}-labs"
-            mv "racecar-neo-${CURRICULUM}-labs"/labs labs
-            rm -rf "racecar-neo-${CURRICULUM}-labs"
+            git clone "${CURR_URL}"
+            mv GLOBALTECH_LABS/labs labs
+            mv GLOBALTECH_LABS/library library
+            rm -rf GLOBALTECH_LABS
             cd "$SCRIPT_DIR"
             break
             ;;
