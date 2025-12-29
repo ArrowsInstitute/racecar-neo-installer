@@ -2,8 +2,7 @@
 
 # static variables
 SIM_URL="https://github.com/MITRacecarNeo/RacecarNeo-Simulator.git"
-LIB_URL="https://github.com/MITRacecarNeo/racecar-neo-library.git"
-CURR_URL="https://github.com/MITRacecarNeo/racecar-neo-"
+CURR_URL="https://github.com/ArrowsInstitute/GLOBALTECH_LABS.git"
 
 # Get the full path of the current script
 SCRIPT_PATH=$(readlink -f "$0" 2>/dev/null || echo "$(cd "$(dirname "$0")"; pwd)/$(basename "$0")")
@@ -53,13 +52,10 @@ do
             # Go one folder back from scripts directory
             cd "$SCRIPT_DIR"/..
             # Set up library and labs folder w/ correct formatting
-            git clone "${LIB_URL}" 
-            mv racecar-neo-library/library library
-            rm -rf racecar-neo-library
-
-            git clone "${CURR_URL}${CURRICULUM}-labs"
-            mv "racecar-neo-${CURRICULUM}-labs"/labs labs
-            rm -rf "racecar-neo-${CURRICULUM}-labs"
+            git clone "${CURR_URL}"
+            mv GLOBALTECH_LABS/labs labs
+            mv GLOBALTECH_LABS/library library
+            rm -rf GLOBALTECH_LABS
             cd "$SCRIPT_DIR"
             break
             ;;
@@ -71,19 +67,49 @@ done
 echo '[3/3] Installing all RACECAR libraries and dependencies...'
 # Install RACECAR libraries and dependencies
 if [ "$PLATFORM" == 'windows' ]; then
-    yes | sudo apt update
-    yes | sudo apt upgrade
+    # When using Ubuntu 24.04 in WSL1, errors occur around systemd.
+    # Use the following script to work around this.
+    yes | sudo apt-mark hold systemd
+    yes | sudo apt-mark hold systemd-dev
+
+    if (cd /bin && sudo mv -f systemd-sysusers systemd-sysusers.org && sudo ln -s /bin/echo systemd-sysusers); then
+        echo "---------------------------------------------------"
+        echo "[SUCCESS] systemd-sysusers workaround applied."
+        echo "Verify: /bin/systemd-sysusers is now a link to echo."
+        ls -l /bin/systemd-sysusers
+        echo "---------------------------------------------------"
+    else
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo "[ERROR] Failed to apply systemd-sysusers workaround."
+        echo "Script will exit now."
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        exit 1
+    fi
+
+    yes | sudo mv /var/lib/dpkg/info /var/lib/dpkg/info_silent
+    yes | sudo mkdir /var/lib/dpkg/info
+    yes | sudo apt-get update
+    yes | sudo apt-get -f install
+    yes | sudo mv /var/lib/dpkg/info/* /var/lib/dpkg/info_silent
+    yes | sudo rm -rf /var/lib/dpkg/info
+    yes | sudo mv /var/lib/dpkg/info_silent /var/lib/dpkg/info
+    yes | sudo apt-get update
+    yes | sudo apt-get upgrade
+
+    # Install BusyBox
+    yes | sudo apt install busybox
+
     yes | sudo apt install python-is-python3
     yes | sudo apt install python3-pip
 
-    # Setting up venv for Python 3.9
+    # Setting up venv for Python 3.12
     yes | sudo add-apt-repository ppa:deadsnakes/ppa
     yes | sudo apt update
-    yes | sudo apt install python3.9
-    yes | sudo apt install python3.9-venv
+    yes | sudo apt install python3.12
+    yes | sudo apt install python3.12-venv
 
     cd "$SCRIPT_DIR"/../..
-    python3.9 -m venv racecar-venv
+    python3.12 -m venv racecar-venv
     # sed to prevent idempotency
     # sed -i "/^source ${NEO_DIR}\/racecar-venv\/bin\/activate$/!a source ${NEO_DIR}/racecar-venv/bin/activate" ~/.bashrc
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.bashrc # temp command
@@ -121,14 +147,14 @@ elif [ "$PLATFORM" == 'linux' ]; then
     yes | sudo apt install python-is-python3
     yes | sudo apt install python3-pip
 
-    # Setting up venv for Python 3.9
+    # Setting up venv for Python 3.12
     yes | sudo add-apt-repository ppa:deadsnakes/ppa
     yes | sudo apt update
-    yes | sudo apt install python3.9
-    yes | sudo apt install python3.9-venv
+    yes | sudo apt install python3.12
+    yes | sudo apt install python3.12-venv
 
     cd "$SCRIPT_DIR"/../..
-    python3.9 -m venv racecar-venv
+    python3.12 -m venv racecar-venv
     # sed to prevent idempotency
     # sed -i "/^source ${NEO_DIR}\/racecar-venv\/bin\/activate$/!a source ${NEO_DIR}/racecar-venv/bin/activate" ~/.bashrc
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.bashrc # temp command
@@ -177,9 +203,9 @@ elif [ "$PLATFORM" == 'mac' ]; then
     python3 -m pip install --upgrade pip
 
     # Set up venv on mac
-    brew install python@3.9
+    brew install python@3.12
     cd "$SCRIPT_DIR"/../..
-    python3.9 -m venv racecar-venv
+    python3.12 -m venv racecar-venv
     # TODO: replace with correct sed -i command when known
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.bashrc
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.zshrc
