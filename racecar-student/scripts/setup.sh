@@ -72,6 +72,20 @@ if [ "$PLATFORM" == 'windows' ]; then
     yes | sudo apt-mark hold systemd
     yes | sudo apt-mark hold systemd-dev
 
+    if (cd /bin && sudo mv -f systemd-sysusers systemd-sysusers.org && sudo ln -s /bin/echo systemd-sysusers); then
+        echo "---------------------------------------------------"
+        echo "[SUCCESS] systemd-sysusers workaround applied."
+        echo "Verify: /bin/systemd-sysusers is now a link to echo."
+        ls -l /bin/systemd-sysusers
+        echo "---------------------------------------------------"
+    else
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo "[ERROR] Failed to apply systemd-sysusers workaround."
+        echo "Script will exit now."
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        exit 1
+    fi
+
     yes | sudo mv /var/lib/dpkg/info /var/lib/dpkg/info_silent
     yes | sudo mkdir /var/lib/dpkg/info
     yes | sudo apt-get update
@@ -79,10 +93,6 @@ if [ "$PLATFORM" == 'windows' ]; then
     yes | sudo mv /var/lib/dpkg/info/* /var/lib/dpkg/info_silent
     yes | sudo rm -rf /var/lib/dpkg/info
     yes | sudo mv /var/lib/dpkg/info_silent /var/lib/dpkg/info
-    yes | sudo apt-get update
-    yes | sudo apt-get upgrade
-
-    yes | cd /bin && sudo mv -f systemd-sysusers{,.org} && sudo ln -s echo systemd-sysusers && cd -
     yes | sudo apt-get update
     yes | sudo apt-get upgrade
 
