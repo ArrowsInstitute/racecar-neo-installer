@@ -71,19 +71,33 @@ done
 echo '[3/3] Installing all RACECAR libraries and dependencies...'
 # Install RACECAR libraries and dependencies
 if [ "$PLATFORM" == 'windows' ]; then
-    yes | sudo apt update
-    yes | sudo apt upgrade
+    # When using Ubuntu 24.04 in WSL1, errors occur around systemd.
+    # Use the following script to work around this.
+    yes | sudo apt-mark hold systemd
+    yes | sudo apt-mark hold systemd-dev
+    yes | cd /bin && mv -f systemd-sysusers{,.org} && ln -s echo systemd-sysusers && cd -
+
+    yes | sudo mv /var/lib/dpkg/info /var/lib/dpkg/info_silent
+    yes | sudo mkdir /var/lib/dpkg/info
+    yes | sudo apt-get update
+    yes | sudo apt-get -f install
+    yes | sudo mv /var/lib/dpkg/info/* /var/lib/dpkg/info_silent
+    yes | sudo rm -rf /var/lib/dpkg/info
+    yes | sudo mv /var/lib/dpkg/info_silent /var/lib/dpkg/info
+    yes | sudo apt-get update
+    yes | sudo apt-get upgrade
+
     yes | sudo apt install python-is-python3
     yes | sudo apt install python3-pip
 
-    # Setting up venv for Python 3.9
+    # Setting up venv for Python 3.12
     yes | sudo add-apt-repository ppa:deadsnakes/ppa
     yes | sudo apt update
-    yes | sudo apt install python3.9
-    yes | sudo apt install python3.9-venv
+    yes | sudo apt install python3.12
+    yes | sudo apt install python3.12-venv
 
     cd "$SCRIPT_DIR"/../..
-    python3.9 -m venv racecar-venv
+    python3.12 -m venv racecar-venv
     # sed to prevent idempotency
     # sed -i "/^source ${NEO_DIR}\/racecar-venv\/bin\/activate$/!a source ${NEO_DIR}/racecar-venv/bin/activate" ~/.bashrc
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.bashrc # temp command
@@ -121,14 +135,14 @@ elif [ "$PLATFORM" == 'linux' ]; then
     yes | sudo apt install python-is-python3
     yes | sudo apt install python3-pip
 
-    # Setting up venv for Python 3.9
+    # Setting up venv for Python 3.12
     yes | sudo add-apt-repository ppa:deadsnakes/ppa
     yes | sudo apt update
-    yes | sudo apt install python3.9
-    yes | sudo apt install python3.9-venv
+    yes | sudo apt install python3.12
+    yes | sudo apt install python3.12-venv
 
     cd "$SCRIPT_DIR"/../..
-    python3.9 -m venv racecar-venv
+    python3.12 -m venv racecar-venv
     # sed to prevent idempotency
     # sed -i "/^source ${NEO_DIR}\/racecar-venv\/bin\/activate$/!a source ${NEO_DIR}/racecar-venv/bin/activate" ~/.bashrc
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.bashrc # temp command
@@ -177,9 +191,9 @@ elif [ "$PLATFORM" == 'mac' ]; then
     python3 -m pip install --upgrade pip
 
     # Set up venv on mac
-    brew install python@3.9
+    brew install python@3.12
     cd "$SCRIPT_DIR"/../..
-    python3.9 -m venv racecar-venv
+    python3.12 -m venv racecar-venv
     # TODO: replace with correct sed -i command when known
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.bashrc
     echo "source ${NEO_DIR}/racecar-venv/bin/activate" >> ~/.zshrc
