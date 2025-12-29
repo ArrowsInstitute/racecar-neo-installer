@@ -71,8 +71,6 @@ if [ "$PLATFORM" == 'windows' ]; then
     # Use the following script to work around this.
     yes | sudo apt-mark hold systemd
     yes | sudo apt-mark hold systemd-dev
-    yes | cd /bin && sudo mv -f systemd-sysusers{,.org} && sudo ln -s echo systemd-sysusers && cd -
-
 
     yes | sudo mv /var/lib/dpkg/info /var/lib/dpkg/info_silent
     yes | sudo mkdir /var/lib/dpkg/info
@@ -81,6 +79,10 @@ if [ "$PLATFORM" == 'windows' ]; then
     yes | sudo mv /var/lib/dpkg/info/* /var/lib/dpkg/info_silent
     yes | sudo rm -rf /var/lib/dpkg/info
     yes | sudo mv /var/lib/dpkg/info_silent /var/lib/dpkg/info
+    yes | sudo apt-get update
+    yes | sudo apt-get upgrade
+
+    yes | cd /bin && sudo mv -f systemd-sysusers{,.org} && sudo ln -s echo systemd-sysusers && cd -
     yes | sudo apt-get update
     yes | sudo apt-get upgrade
 
