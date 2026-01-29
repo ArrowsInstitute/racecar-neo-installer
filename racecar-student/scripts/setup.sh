@@ -193,6 +193,9 @@ elif [ "$PLATFORM" == 'mac' ]; then
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.bash_profile
 
+    source ~/.zprofile
+    source ~/.bash_profile
+
     /bin/bash brew install python3
 
     echo 'export PATH="/usr/local/opt/python/libexec/bin:$PATH"' >> ~/.zprofile
